@@ -264,6 +264,18 @@ h2 {
   color: var(--pale-blue);
 }
 
+.button {
+  border-radius: 30px;
+  border: transparent;
+  height: 30px;
+  width: 90px;
+  background: linear-gradient(var(--background-color), var(--container-background-color));
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--pale-blue);
+
+}
+
 #spaceLeft {
   font-size: 0.8rem;
   text-transform: uppercase;

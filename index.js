@@ -6,7 +6,10 @@ fileInput.addEventListener('change', selectFile);
 const MBUnit = 1024 * 1024;
 const maxSize = 10;
 
-let uploadedFiles = [];
+let uploadedFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+
+displayFiles(uploadedFiles);
+updateStorageDisplay();
 
 function openFileExp() {
     fileInput.click();
@@ -23,7 +26,11 @@ function selectFile() {
                 return;
             }
             else
-                uploadedFiles.push(files[i]);
+                uploadedFiles.push({
+                    name: files[i].name,
+                    size: files[i].size,
+                    type: files[i].type
+                });
         }
 
         else {
@@ -32,19 +39,32 @@ function selectFile() {
         }
     }
 
+    localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
+
     displayFiles(uploadedFiles);
-    checkStorageSize(files);
+    checkStorageSize();
 }
 
 function checkStorageSize() {
     let totalSize = 0;
-    for (let i = 0; i < uploadedFiles.length; i++) {
-        totalSize += uploadedFiles[i].size;
-        if (totalSize > maxSize * MBUnit) {
-            alert("no more space");
-            return;
-        }
+    uploadedFiles.forEach(file => {
+        totalSize += file.size;
+    });
+
+    if (totalSize > maxSize * MBUnit) {
+        alert("no more space");
+        return;
     }
+
+    updateStorageDisplay(totalSize);
+}
+
+
+function updateStorageDisplay(totalSize = 0) {
+    if (totalSize == 0) {
+        uploadedFiles.forEach(file => totalSize += file.size);
+    }
+
     const MBRemaining = (totalSize / MBUnit).toFixed(2);
     document.getElementById('spaceUsed').textContent = MBRemaining + ' MB';
 
@@ -52,8 +72,8 @@ function checkStorageSize() {
     document.getElementById('spaceLeft').textContent = spaceLeft + ' MB left';
 
     UpdateGradientBar(MBRemaining);
-
 }
+
 
 function UpdateGradientBar(MBRemaining) {
     let gradientBarPercent = (MBRemaining / maxSize) * 100;
@@ -69,5 +89,16 @@ function displayFiles(files) {
         const listItem = document.createElement('li');
         listItem.textContent = file.name + ' - ' + (file.size / MBUnit).toFixed(2) + ' MB';
         fileList.appendChild(listItem);
+
     });
 }
+
+function clearStorage() {
+    localStorage.removeItem('uploadedFiles');
+    uploadedFiles = [];
+
+    document.getElementById('fileList').innerHTML = '';
+    updateStorageDisplay();
+}
+
+checkStorageSize();
